@@ -4,6 +4,8 @@
  * @file    glx.cpp
  * @brief   Application OpenGL minimaliste pour Linux (GLX) pour tester la Borne LCD Ucineo23
  *
+ * Basé sur l'exemple http://www.talisman.org/opengl-1.1/Reference/glXIntro.html
+ *
  * @author  20/12/2013 SRO
 */
 #include <GL/glx.h>
@@ -14,13 +16,24 @@
 #include <pthread.h>
 #include <sched.h>
 
-static int attributeListDbl[] = { 
+
+#define DOUBLE_BUFFERING
+#ifndef DOUBLE_BUFFERING
+static int attributeList[] = {
+    GLX_RGBA,
+    GLX_RED_SIZE,   8,
+    GLX_GREEN_SIZE, 8,
+    GLX_BLUE_SIZE,  8,
+    None };
+#else // DOUBLE_BUFFERING
+static int attributeList[] = {
 	GLX_RGBA, 
 	GLX_DOUBLEBUFFER,
 	GLX_RED_SIZE,   8,
 	GLX_GREEN_SIZE, 8,
 	GLX_BLUE_SIZE,  8,
 	None };
+#endif // DOUBLE_BUFFERING
 	
 
 // Get tick in microseconds
@@ -89,7 +102,7 @@ int main(int argc, char **argv) {
     dpy = XOpenDisplay(0);
 
     /* get an appropriate visual */
-    vi = glXChooseVisual(dpy, DefaultScreen(dpy), attributeListDbl);
+    vi = glXChooseVisual(dpy, DefaultScreen(dpy), attributeList);
 
     /* create a GLX context */
     cx = glXCreateContext(dpy, vi, 0, GL_TRUE);
@@ -185,8 +198,10 @@ int main(int argc, char **argv) {
         /* flush GL buffers */
         glFlush();
 
+#ifdef DOUBLE_BUFFERING
         /* swap GL buffers */
         glXSwapBuffers(dpy,win);
+#endif
 
     } while (1);
 
